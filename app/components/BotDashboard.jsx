@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
@@ -223,4 +223,288 @@ export default function BotDashboard() {
                     </button>
                     <button
                       onClick={() => deleteBot(bot.id, bot.bot_name)}
-                      className="p-2 hover:bg-red-500
+                      className="p-2 hover:bg-red-500/10 rounded-lg"
+                      title="Delete bot"
+                    >
+                      <Trash2 className="w-4 h-4 text-discord-red" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => toggleBotStatus(bot)}
+                      className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-2 ${
+                        bot.status === 'online'
+                          ? 'bg-discord-red/20 text-discord-red hover:bg-discord-red/30'
+                          : 'bg-discord-green/20 text-discord-green hover:bg-discord-green/30'
+                      }`}
+                    >
+                      {bot.status === 'online' ? (
+                        <>
+                          <StopCircle className="w-4 h-4" />
+                          <span>Stop</span>
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4" />
+                          <span>Start</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedBot(bot)
+                        setShowEditor(true)
+                      }}
+                      className="flex-1 py-2 bg-discord-blurple/20 text-discord-blurple rounded-lg hover:bg-discord-blurple/30 flex items-center justify-center gap-2"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                      <span>Edit</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-1 text-discord-light-gray">
+                      <Clock className="w-4 h-4" />
+                      <span>Created {new Date(bot.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <Link
+                      href={`/bot/${bot.id}`}
+                      className="flex items-center gap-1 text-discord-blurple hover:underline"
+                    >
+                      <span>Details</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {bots.length === 0 && (
+            <div className="text-center py-16 panel">
+              <div className="w-20 h-20 mx-auto mb-6 bg-discord-dark rounded-full flex items-center justify-center">
+                <Bot className="w-10 h-10 text-discord-light-gray" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">No bots yet</h3>
+              <p className="text-discord-light-gray mb-6">Create your first Discord bot to get started</p>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="btn-primary mx-auto"
+              >
+                Create Your First Bot
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Right Column - Analytics */}
+        <div className="space-y-6">
+          <div className="panel p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <BarChart3 className="w-6 h-6 text-discord-blurple" />
+              <h3 className="font-bold">Activity Overview</h3>
+            </div>
+            <div className="h-48">
+              <LineChart width={300} height={200} data={activityData}>
+                <Line type="monotone" dataKey="commands" stroke="#5865F2" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="errors" stroke="#ED4245" strokeWidth={2} dot={false} />
+              </LineChart>
+            </div>
+          </div>
+
+          <div className="panel p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <Zap className="w-6 h-6 text-discord-yellow" />
+              <h3 className="font-bold">Command Usage</h3>
+            </div>
+            <div className="h-48">
+              <PieChart width={300} height={200}>
+                <Pie
+                  data={commandData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={60}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {commandData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              {commandData.map((cmd) => (
+                <div key={cmd.name} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cmd.color }} />
+                  <span className="text-sm">{cmd.name}</span>
+                  <span className="text-sm text-discord-light-gray ml-auto">{cmd.value}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Create Bot Modal */}
+      <AnimatePresence>
+        {showCreateModal && (
+          <CreateBotModal
+            onSubmit={handleCreateBot}
+            onClose={() => setShowCreateModal(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Bot Editor */}
+      <AnimatePresence>
+        {showEditor && selectedBot && (
+          <BotEditor
+            bot={selectedBot}
+            onClose={() => {
+              setShowEditor(false)
+              setSelectedBot(null)
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+function CreateBotModal({ onSubmit, onClose }) {
+  const [formData, setFormData] = useState({
+    name: '',
+    token: '',
+  })
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (formData.name && formData.token) {
+      onSubmit(formData)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="panel w-full max-w-md"
+      >
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold">Create New Bot</h3>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-white/5 rounded-lg"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Bot Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="input-field"
+                placeholder="My Awesome Bot"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Discord Bot Token</label>
+              <input
+                type="password"
+                value={formData.token}
+                onChange={(e) => setFormData({ ...formData, token: e.target.value })}
+                className="input-field"
+                placeholder="Enter your bot token"
+                required
+              />
+              <p className="text-xs text-discord-light-gray mt-2">
+                Get your token from the Discord Developer Portal
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <button type="button" onClick={onClose} className="btn-secondary flex-1">
+                Cancel
+              </button>
+              <button type="submit" className="btn-primary flex-1">
+                Create Bot
+              </button>
+            </div>
+          </form>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+const defaultCode = `const { Client, GatewayIntentBits, Collection } = require('discord.js');
+
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers
+  ]
+});
+
+client.commands = new Collection();
+
+// Ready event
+client.on('ready', () => {
+  console.log(\`✅ \${client.user.tag} is online!\`);
+  client.user.setActivity('with Discord.js');
+});
+
+// Message handler
+client.on('messageCreate', async message => {
+  if (message.author.bot) return;
+
+  if (message.content === '!ping') {
+    const latency = Date.now() - message.createdTimestamp;
+    await message.reply(\`🏓 Pong! Latency: \${latency}ms\`);
+  }
+
+  if (message.content === '!help') {
+    const embed = {
+      color: 0x5865F2,
+      title: '🤖 Bot Commands',
+      fields: [
+        { name: '!ping', value: 'Check bot latency', inline: true },
+        { name: '!help', value: 'Show this message', inline: true }
+      ],
+      timestamp: new Date()
+    };
+    await message.reply({ embeds: [embed] });
+  }
+});
+
+// Slash command handler
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === 'ping') {
+    await interaction.reply('Pong!');
+  }
+});
+
+// Error handling
+client.on('error', console.error);
+process.on('unhandledRejection', console.error);
+
+// Login
+client.login(process.env.TOKEN);`
