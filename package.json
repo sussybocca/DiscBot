@@ -1,0 +1,52 @@
+{
+  "name": "discord-bot-creator-pro",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@supabase/supabase-js": "^2.38.0",
+    "@supabase/ssr": "^0.1.0",
+    "@supabase/auth-helpers-nextjs": "^0.8.6",
+    "@octokit/rest": "^20.0.0",
+    "discord.js": "^14.14.0",
+    "axios": "^1.5.0",
+    "lucide-react": "^0.309.0",
+    "@monaco-editor/react": "^4.5.2",
+    "react-hot-toast": "^2.4.1",
+    "framer-motion": "^10.16.0",
+    "@headlessui/react": "^1.7.17",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.2.0",
+    "recharts": "^2.10.3",
+    "react-markdown": "^9.0.0",
+    "prism-react-renderer": "^2.3.0",
+    "date-fns": "^2.30.0",
+    "react-query": "^3.39.3",
+    "react-hook-form": "^7.47.0",
+    "zod": "^3.22.4",
+    "swr": "^2.2.0",
+    "socket.io-client": "^4.7.2",
+    "react-confetti": "^6.1.0",
+    "react-loader-spinner": "^5.3.4",
+    "react-copy-to-clipboard": "^5.1.0",
+    "react-tooltip": "^5.22.0",
+    "react-resizable-panels": "^2.0.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "eslint": "^8.54.0",
+    "eslint-config-next": "14.0.0"
+  }
+}
